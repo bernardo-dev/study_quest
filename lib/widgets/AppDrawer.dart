@@ -59,7 +59,7 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => SubjectPage(),
+                    pageBuilder: (_, __, ___) => SubjectsPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );
