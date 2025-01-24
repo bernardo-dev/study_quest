@@ -88,6 +88,39 @@ class _SubjectsPageState extends State<SubjectsPage> {
     });
   }
 
+  // Method to show the schedule table in a dialog
+  void _showScheduleDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Selecione os horários disponíveis durante a semana'),
+          content: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SingleChildScrollView(
+              child: ScheduleTable(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Fechar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Confirmar'),
+              onPressed: () {
+                // Adicione a lógica para salvar ou processar os dados do cronograma aqui
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,25 +161,89 @@ class _SubjectsPageState extends State<SubjectsPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddSubjectDialog,
-        child: Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _showAddSubjectDialog,
+            child: Icon(Icons.add),
+            tooltip: 'Add Subject',
+          ),
+          SizedBox(height: 10),
+          FloatingActionButton(
+            onPressed: _showScheduleDialog,
+            child: Icon(Icons.schedule),
+            tooltip: 'Criar Cronograma',
+          ),
+        ],
       ),
     );
   }
 }
 
-class SubjectDetailPage extends StatelessWidget {
+class ScheduleTable extends StatefulWidget {
+  @override
+  _ScheduleTableState createState() => _ScheduleTableState();
+}
+
+class _ScheduleTableState extends State<ScheduleTable> {
+  List<List<bool>> schedule = List.generate(24, (_) => List.generate(7, (_) => false));
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: [
+        DataColumn(label: Text('Hour')),
+        DataColumn(label: Text('Mon')),
+        DataColumn(label: Text('Tue')),
+        DataColumn(label: Text('Wed')),
+        DataColumn(label: Text('Thu')),
+        DataColumn(label: Text('Fri')),
+        DataColumn(label: Text('Sat')),
+        DataColumn(label: Text('Sun')),
+      ],
+      rows: List.generate(24, (hour) {
+        return DataRow(
+          cells: List.generate(8, (day) {
+            if (day == 0) {
+              return DataCell(Text('$hour:00'));
+            } else {
+              return DataCell(
+                Checkbox(
+                  value: schedule[hour][day - 1],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      schedule[hour][day - 1] = value ?? false;
+                    });
+                  },
+                ),
+              );
+            }
+          }),
+        );
+      }),
+    );
+  }
+}
+
+class SubjectDetailPage extends StatefulWidget {
   final String subject;
   final Function(String) onDelete;
 
   const SubjectDetailPage({required this.subject, required this.onDelete});
 
   @override
+  _SubjectDetailPageState createState() => _SubjectDetailPageState();
+}
+
+class _SubjectDetailPageState extends State<SubjectDetailPage> {
+  List<List<bool>> schedule = List.generate(24, (_) => List.generate(7, (_) => false));
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(subject),
+        title: Text(widget.subject),
         actions: [
           IconButton(
             icon: Icon(Icons.delete),
@@ -167,7 +264,7 @@ class SubjectDetailPage extends StatelessWidget {
                       TextButton(
                         child: Text('Delete'),
                         onPressed: () {
-                          onDelete(subject);
+                          widget.onDelete(widget.subject);
                           Navigator.pop(context);
                         },
                       ),
@@ -179,8 +276,42 @@ class SubjectDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Text('Details for $subject'),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: DataTable(
+            columns: [
+              DataColumn(label: Text('Hour')),
+              DataColumn(label: Text('Mon')),
+              DataColumn(label: Text('Tue')),
+              DataColumn(label: Text('Wed')),
+              DataColumn(label: Text('Thu')),
+              DataColumn(label: Text('Fri')),
+              DataColumn(label: Text('Sat')),
+              DataColumn(label: Text('Sun')),
+            ],
+            rows: List.generate(24, (hour) {
+              return DataRow(
+                cells: List.generate(8, (day) {
+                  if (day == 0) {
+                    return DataCell(Text('$hour:00'));
+                  } else {
+                    return DataCell(
+                      Checkbox(
+                        value: schedule[hour][day - 1],
+                        onChanged: (bool? value) {
+                          setState(() {
+                            schedule[hour][day - 1] = value ?? false;
+                          });
+                        },
+                      ),
+                    );
+                  }
+                }),
+              );
+            }),
+          ),
+        ),
       ),
     );
   }
