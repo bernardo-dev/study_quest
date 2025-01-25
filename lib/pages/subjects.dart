@@ -8,7 +8,7 @@ class SubjectsPage extends StatefulWidget {
 }
 
 class _SubjectsPageState extends State<SubjectsPage> {
-  String selectedPage = 'Subjects';
+  String selectedPage = 'Disciplinas';
   List<Map<String, dynamic>> subjects = [];
   List<Map<String, dynamic>> filteredSubjects = [];
   List<List<bool>> schedule = List.generate(24, (_) => List.generate(7, (_) => false));
@@ -38,7 +38,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Subject'),
+          title: Text('Adicionar Disciplina'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -46,12 +46,12 @@ class _SubjectsPageState extends State<SubjectsPage> {
                 onChanged: (value) {
                   newSubject = value;
                 },
-                decoration: InputDecoration(hintText: "Subject Name"),
+                decoration: InputDecoration(hintText: "Nome da Disciplina"),
               ),
               SizedBox(height: 20),
               Row(
                 children: [
-                  Text('Weekly Study Hours:'),
+                  Text('Horas Semanais de Estudo:'),
                   Spacer(),
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
@@ -76,7 +76,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
               SizedBox(height: 20),
               Row(
                 children: [
-                  Text('Select Icon:'),
+                  Text('Selecionar Ícone:'),
                   Spacer(),
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
@@ -113,7 +113,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
               SizedBox(height: 20),
               Row(
                 children: [
-                  Text('Select Color:'),
+                  Text('Selecionar Cor:'),
                   Spacer(),
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
@@ -167,13 +167,13 @@ class _SubjectsPageState extends State<SubjectsPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Add'),
+              child: Text('Adicionar'),
               onPressed: () {
                 if (newSubject.isNotEmpty) {
                   _addSubject(newSubject, selectedHours, selectedIcon, selectedColor);
@@ -198,7 +198,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Subject'),
+          title: Text('Editar Disciplina'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -207,12 +207,12 @@ class _SubjectsPageState extends State<SubjectsPage> {
                 onChanged: (value) {
                   updatedSubject = value;
                 },
-                decoration: InputDecoration(hintText: "Subject Name"),
+                decoration: InputDecoration(hintText: "Nome da Disciplina"),
               ),
               SizedBox(height: 20),
               Row(
                 children: [
-                  Text('Weekly Study Hours:'),
+                  Text('Horas Semanais de Estudo:'),
                   Spacer(),
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
@@ -237,7 +237,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
               SizedBox(height: 20),
               Row(
                 children: [
-                  Text('Select Icon:'),
+                  Text('Selecionar Ícone:'),
                   Spacer(),
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
@@ -274,7 +274,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
               SizedBox(height: 20),
               Row(
                 children: [
-                  Text('Select Color:'),
+                  Text('Selecionar Cor:'),
                   Spacer(),
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
@@ -328,19 +328,19 @@ class _SubjectsPageState extends State<SubjectsPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Delete'),
+              child: Text('Excluir'),
               onPressed: () {
                 _showDeleteConfirmationDialog(subject);
               },
             ),
             TextButton(
-              child: Text('Save'),
+              child: Text('Salvar'),
               onPressed: () {
                 if (updatedSubject.isNotEmpty) {
                   setState(() {
@@ -366,17 +366,17 @@ class _SubjectsPageState extends State<SubjectsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Subject'),
-          content: Text('Are you sure you want to delete this subject?'),
+          title: Text('Excluir Disciplina'),
+          content: Text('Tem certeza de que deseja excluir esta disciplina?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Delete'),
+              child: Text('Excluir'),
               onPressed: () {
                 _deleteSubject(subject);
                 Navigator.of(context).pop();
@@ -412,53 +412,57 @@ class _SubjectsPageState extends State<SubjectsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Available Times'),
+          title: Text('Selecione os Horários Disponíveis'),
           content: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SingleChildScrollView(
-              child: DataTable(
-                columns: [
-                  DataColumn(label: Text('Time')),
-                  DataColumn(label: Text('Mon')),
-                  DataColumn(label: Text('Tue')),
-                  DataColumn(label: Text('Wed')),
-                  DataColumn(label: Text('Thu')),
-                  DataColumn(label: Text('Fri')),
-                  DataColumn(label: Text('Sat')),
-                  DataColumn(label: Text('Sun')),
-                ],
-                rows: List.generate(24, (hour) {
-                  return DataRow(
-                    cells: List.generate(8, (day) {
-                      if (day == 0) {
-                        return DataCell(Text('$hour:00'));
-                      } else {
-                        return DataCell(
-                          Checkbox(
-                            value: schedule[hour][day - 1],
-                            onChanged: (bool? value) {
-                              setState(() {
-                                schedule[hour][day - 1] = value ?? false;
-                              });
-                            },
-                          ),
-                        );
-                      }
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return DataTable(
+                    columns: [
+                      DataColumn(label: Text('Hora')),
+                      DataColumn(label: Text('Seg')),
+                      DataColumn(label: Text('Ter')),
+                      DataColumn(label: Text('Qua')),
+                      DataColumn(label: Text('Qui')),
+                      DataColumn(label: Text('Sex')),
+                      DataColumn(label: Text('Sáb')),
+                      DataColumn(label: Text('Dom')),
+                    ],
+                    rows: List.generate(24, (hour) {
+                      return DataRow(
+                        cells: List.generate(8, (day) {
+                          if (day == 0) {
+                            return DataCell(Text('$hour:00'));
+                          } else {
+                            return DataCell(
+                              Checkbox(
+                                value: schedule[hour][day - 1],
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    schedule[hour][day - 1] = value ?? false;
+                                  });
+                                },
+                              ),
+                            );
+                          }
+                        }),
+                      );
                     }),
                   );
-                }),
+                },
               ),
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Close'),
+              child: Text('Fechar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Confirm'),
+              child: Text('Confirmar'),
               onPressed: () {
                 // Add logic to save or process the schedule data here
                 Navigator.of(context).pop();
@@ -491,7 +495,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
             child: TextField(
               onChanged: _filterSubjects,
               decoration: InputDecoration(
-                labelText: 'Search',
+                labelText: 'Pesquisar',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
               ),
@@ -512,7 +516,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
                       filteredSubjects[index]['name'],
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('Weekly Study Hours: ${filteredSubjects[index]['hours']}h'),
+                    subtitle: Text('Horas Semanais de Estudo: ${filteredSubjects[index]['hours']}h'),
                     trailing: Icon(Icons.edit),
                     onTap: () => _showEditSubjectDialog(filteredSubjects[index]),
                   ),
@@ -527,13 +531,13 @@ class _SubjectsPageState extends State<SubjectsPage> {
         children: [
           FloatingActionButton(
             onPressed: _showAddSubjectDialog,
-            tooltip: 'Add Subject',
+            tooltip: 'Adicionar Disciplina',
             child: Icon(Icons.add),
           ),
           SizedBox(height: 10),
           FloatingActionButton(
             onPressed: _showScheduleDialog,
-            tooltip: 'Create Schedule',
+            tooltip: 'Criar Cronograma',
             child: Icon(Icons.schedule),
           ),
         ],
