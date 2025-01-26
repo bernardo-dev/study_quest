@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:study_quest/providers/appointment_editor_state.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'package:study_quest/widgets/app_drawer.dart';
 import 'package:study_quest/providers/appointment_data_source.dart';
+
+import 'package:study_quest/views/calendar/appointment_editor.dart';
 
 /// The hove page which hosts the calendar
 class CalendarPage extends StatefulWidget {
@@ -15,37 +19,54 @@ class CalendarPage extends StatefulWidget {
   _CalendarPageState createState() => _CalendarPageState();
 }
 
+List<Color> _colorCollection = <Color>[];
+List<String> _colorNames = <String>[];
+int _selectedColorIndex = 0;
+int _selectedTimeZoneIndex = 0;
+List<String> _timeZoneCollection = <String>[];
+late AppointmentDataSource _events;
+Appointment? _selectedAppointment;
+late DateTime _startDate;
+late TimeOfDay _startTime;
+late DateTime _endDate;
+late TimeOfDay _endTime;
+bool _isAllDay = false;
+String _subject = '';
+String _notes = '';
+
 class _CalendarPageState extends State<CalendarPage> {
   String selectedPage = 'Página Inicial';
 
   CalendarController calendarController = CalendarController();
 
-  List<Color> _colorCollection = <Color>[];
-  List<String> _colorNames = <String>[];
-  int _selectedColorIndex = 0;
-  int _selectedTimeZoneIndex = 0;
-  List<String> _timeZoneCollection = <String>[];
-  late AppointmentDataSource _events;
-  Appointment? _selectedAppointment;
-  late DateTime _startDate;
-  late TimeOfDay _startTime;
-  late DateTime _endDate;
-  late TimeOfDay _endTime;
-  bool _isAllDay = false;
-  String _subject = '';
-  String _notes = '';
+  @override
+  void initState() {
+    _events = AppointmentDataSource(_getDataSource());
+    _selectedAppointment = null;
+    _selectedColorIndex = 0;
+    _selectedTimeZoneIndex = 0;
+    _subject = '';
+    _notes = '';
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Padding(
+            padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
+            child: getEventCalendar(_events, onCalendarTapped)));
+  }
+
+  Scaffold getEventCalendar(CalendarDataSource _calendarDataSource,
+      CalendarTapCallback calendarTapCallback) {
     return Scaffold(
       body: SfCalendar(
         view: CalendarView.week,
         controller: calendarController,
         showNavigationArrow: true,
         dataSource: AppointmentDataSource(_getDataSource()),
-        // by default the month appointment display mode set as Indicator, we can
-        // change the display mode as appointment using the appointment display
-        // mode property
         monthViewSettings: const MonthViewSettings(
             appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
         allowedViews: [
@@ -53,53 +74,92 @@ class _CalendarPageState extends State<CalendarPage> {
           CalendarView.week,
           CalendarView.workWeek,
           CalendarView.month,
-          CalendarView.timelineDay,
-          CalendarView.timelineWeek,
-          CalendarView.timelineWorkWeek,
-          CalendarView.timelineMonth,
+          // CalendarView.timelineDay,
+          // CalendarView.timelineWeek,
+          // CalendarView.timelineWorkWeek,
+          // CalendarView.timelineMonth,
           CalendarView.schedule
         ],
-        allowDragAndDrop: true,
-        onTap: (CalendarTapDetails details) {
-          if (details.targetElement == CalendarElement.appointment) {
-            final Appointment appointment = details.appointments![0];
-            showDialog(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: Text(appointment.subject),
-                content: Column(
-                  children: <Widget>[
-                    Text('Início: ${appointment.startTime}'),
-                    Text('Fim: ${appointment.endTime}'),
-                  ],
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Fechar'),
-                  ),
-                ],
-              ),
-            );
-          } else {}
-        },
+        onTap: calendarTapCallback,
       ),
       appBar: AppBar(
         title: Text(selectedPage),
       ),
       drawer: AppDrawer(
-        selectedPage:
-            selectedPage, // Passando a página selecionada para o Drawer
-        onItemSelected: (String page) {
-          setState(() {
-            selectedPage = page;
-          });
-        },
-      ),
+          selectedPage: selectedPage,
+          onItemSelected: (String page) {
+            setState(() {
+              selectedPage = page;
+            });
+          }),
     );
   }
+
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     body: SfCalendar(
+  //       view: CalendarView.week,
+  //       controller: calendarController,
+  //       showNavigationArrow: true,
+  //       dataSource: AppointmentDataSource(_getDataSource()),
+  //       // by default the month appointment display mode set as Indicator, we can
+  //       // change the display mode as appointment using the appointment display
+  //       // mode property
+  //       monthViewSettings: const MonthViewSettings(
+  //           appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
+  //       allowedViews: [
+  //         CalendarView.day,
+  //         CalendarView.week,
+  //         CalendarView.workWeek,
+  //         CalendarView.month,
+  //         // CalendarView.timelineDay,
+  //         // CalendarView.timelineWeek,
+  //         // CalendarView.timelineWorkWeek,
+  //         // CalendarView.timelineMonth,
+  //         CalendarView.schedule
+  //       ],
+  //       allowDragAndDrop: true,
+  //       onTap: (CalendarTapDetails details) {
+  //         print(details.targetElement);
+  //         if (details.targetElement == CalendarElement.appointment) {
+  //           final Appointment appointment = details.appointments![0];
+  //           showDialog(
+  //             context: context,
+  //             builder: (BuildContext context) => AlertDialog(
+  //               title: Text(appointment.subject),
+  //               content: Column(
+  //                 children: <Widget>[
+  //                   Text('Início: ${appointment.startTime}'),
+  //                   Text('Fim: ${appointment.endTime}'),
+  //                 ],
+  //               ),
+  //               actions: <Widget>[
+  //                 TextButton(
+  //                   onPressed: () {
+  //                     Navigator.pop(context);
+  //                   },
+  //                   child: const Text('Fechar'),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         } else {}
+  //       },
+  //     ),
+  //     appBar: AppBar(
+  //       title: Text(selectedPage),
+  //     ),
+  //     drawer: AppDrawer(
+  //       selectedPage:
+  //           selectedPage, // Passando a página selecionada para o Drawer
+  //       onItemSelected: (String page) {
+  //         setState(() {
+  //           selectedPage = page;
+  //         });
+  //       },
+  //     ),
+  //   );
+  // }
 
   void onCalendarTapped(CalendarTapDetails calendarTapDetails) {
     if (calendarTapDetails.targetElement != CalendarElement.calendarCell &&
@@ -137,9 +197,10 @@ class _CalendarPageState extends State<CalendarPage> {
               ? 0
               : _timeZoneCollection
                   .indexOf(appointmentDetails.startTimeZone ?? '');
-          _subject = appointmentDetails.subject == '(No title)'
-              ? ''
-              : appointmentDetails.subject;
+          Provider.of<AppointmentState>(context, listen: false).setSubject(
+              appointmentDetails.subject == '(No title)'
+                  ? ''
+                  : appointmentDetails.subject);
           _notes = appointmentDetails.notes ?? '';
           _selectedAppointment = appointmentDetails;
         } else {
@@ -147,9 +208,13 @@ class _CalendarPageState extends State<CalendarPage> {
           _startDate = date;
           _endDate = date.add(const Duration(hours: 1));
         }
-        _startTime = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
+        _startTime =
+            TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
         _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AppointmentEditor()))
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => AppointmentEditor()));
       }
     });
   }
