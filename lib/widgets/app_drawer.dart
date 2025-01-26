@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../pages/home.dart';
-import '../pages/subjects.dart';
+import '../views/calendar/calendar.dart';
+import '../views/subjects/subjects.dart';
 
 class AppDrawer extends StatelessWidget {
   final String selectedPage; // Passando a página selecionada
   final ValueChanged<String> onItemSelected;
 
-  const AppDrawer({super.key, required this.selectedPage, required this.onItemSelected});
+  const AppDrawer(
+      {super.key, required this.selectedPage, required this.onItemSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +30,19 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.calendar_month),
             title: const Text('Página Inicial'),
-            tileColor: selectedPage == 'Página Inicial' ? Colors.blue.withOpacity(0.2) : null, // Página atual com cor diferenciada
+            tileColor: selectedPage == 'Página Inicial'
+                ? Colors.blue.withOpacity(0.2)
+                : null, // Página atual com cor diferenciada
             onTap: () {
-              if (selectedPage == "Página Inicial"){
+              // If the selected page is the current page, close the drawer
+              if (selectedPage == "Página Inicial") {
                 Navigator.pop(context);
-              }
-              else{
+              } else {
                 onItemSelected('Página Inicial');
                 Navigator.pushReplacement(
                   context,
                   PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => MyHomePage(),
+                    pageBuilder: (_, __, ___) => CalendarPage(),
                     transitionDuration: Duration.zero,
                   ),
                 );
@@ -49,12 +52,13 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.book),
             title: const Text('Disciplinas'),
-            tileColor: selectedPage == 'Disciplinas' ? Colors.blue.withOpacity(0.2) : null, // Página atual com cor diferenciada
+            tileColor: selectedPage == 'Disciplinas'
+                ? Colors.blue
+                : null, // Página atual com cor diferenciada
             onTap: () {
-              if (selectedPage == "Disciplinas"){
+              if (selectedPage == "Disciplinas") {
                 Navigator.pop(context);
-              }
-              else{
+              } else {
                 onItemSelected('Disciplinas');
                 Navigator.pushReplacement(
                   context,
@@ -69,7 +73,9 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.flag),
             title: const Text('Metas'),
-            tileColor: selectedPage == 'Metas' ? Colors.blue.withOpacity(0.2) : null, // Página atual com cor diferenciada
+            tileColor: selectedPage == 'Metas'
+                ? Colors.blue.withOpacity(0.2)
+                : null, // Página atual com cor diferenciada
             onTap: () {
               onItemSelected('Metas');
             },

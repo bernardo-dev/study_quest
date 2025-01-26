@@ -31,10 +31,18 @@ dependencies:
   flutter:
     sdk: flutter
 
+  provider: ^6.0.1
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+
+  # Syncfusion Flutter Calendar package.
   syncfusion_flutter_calendar: ^28.1.41
+
+  # Localizations for the Flutter library.
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

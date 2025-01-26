@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/AppDrawer.dart';
+import '../../widgets/app_drawer.dart';
 
 class SubjectsPage extends StatefulWidget {
   @override
@@ -66,7 +66,9 @@ class _SubjectsPageState extends State<SubjectsPage> {
   void _navigateToSubjectDetail(String subject) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SubjectDetailPage(subject: subject, onDelete: _deleteSubject)),
+      MaterialPageRoute(
+          builder: (context) =>
+              SubjectDetailPage(subject: subject, onDelete: _deleteSubject)),
     );
   }
 
@@ -83,7 +85,8 @@ class _SubjectsPageState extends State<SubjectsPage> {
   void _filterSubjects(String query) {
     setState(() {
       filteredSubjects = subjects
-          .where((subject) => subject.toLowerCase().contains(query.toLowerCase()))
+          .where(
+              (subject) => subject.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -154,7 +157,8 @@ class _SubjectsPageState extends State<SubjectsPage> {
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(filteredSubjects[index]),
-                  onTap: () => _navigateToSubjectDetail(filteredSubjects[index]),
+                  onTap: () =>
+                      _navigateToSubjectDetail(filteredSubjects[index]),
                 );
               },
             ),
@@ -187,7 +191,8 @@ class ScheduleTable extends StatefulWidget {
 }
 
 class _ScheduleTableState extends State<ScheduleTable> {
-  List<List<bool>> schedule = List.generate(24, (_) => List.generate(7, (_) => false));
+  List<List<bool>> schedule =
+      List.generate(24, (_) => List.generate(7, (_) => false));
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +242,8 @@ class SubjectDetailPage extends StatefulWidget {
 }
 
 class _SubjectDetailPageState extends State<SubjectDetailPage> {
-  List<List<bool>> schedule = List.generate(24, (_) => List.generate(7, (_) => false));
+  List<List<bool>> schedule =
+      List.generate(24, (_) => List.generate(7, (_) => false));
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +259,8 @@ class _SubjectDetailPageState extends State<SubjectDetailPage> {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text('Delete Subject'),
-                    content: Text('Are you sure you want to delete this subject?'),
+                    content:
+                        Text('Are you sure you want to delete this subject?'),
                     actions: <Widget>[
                       TextButton(
                         child: Text('Cancel'),
