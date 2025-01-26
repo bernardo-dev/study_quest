@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import '../../widgets/app_drawer.dart';
+import '../../providers/subject_provider.dart';
 
 class SubjectsPage extends StatefulWidget {
   const SubjectsPage({super.key});
@@ -11,58 +12,126 @@ class SubjectsPage extends StatefulWidget {
 
 class _SubjectsPageState extends State<SubjectsPage> {
   String selectedPage = 'Disciplinas';
-  List<Map<String, dynamic>> subjects = [];
-  List<Map<String, dynamic>> filteredSubjects = [];
-  List<List<bool>> schedule =
-      List.generate(24, (_) => List.generate(7, (_) => false));
+  List<List<bool>> schedule = List.generate(24, (_) => List.generate(7, (_) => false));
+  String searchQuery = '';
 
   @override
-  void initState() {
-    super.initState();
-    filteredSubjects = subjects;
+  Widget build(BuildContext context) {
+    final subjectProvider = Provider.of<SubjectProvider>(context);
+    final subjects = subjectProvider.subjects;
+
+    // Filtrar disciplinas com base na consulta de pesquisa
+    final filteredSubjects = subjects.where((subject) {
+      final subjectName = subject['name'].toLowerCase();
+      final query = searchQuery.toLowerCase();
+      return subjectName.contains(query);
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(selectedPage),
+      ),
+      drawer: AppDrawer(
+        selectedPage: selectedPage,
+        onItemSelected: (String page) {
+          setState(() {
+            selectedPage = page;
+          });
+        },
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (query) {
+                setState(() {
+                  searchQuery = query;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Pesquisar',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredSubjects.length,
+              itemBuilder: (context, index) {
+                final subject = filteredSubjects[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Color(subject['color']),
+                      child: Icon(IconData(subject['icon'], fontFamily: 'MaterialIcons'), color: Colors.white),
+                    ),
+                    title: Text(
+                      subject['name'],
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text('Horas Semanais de Estudo: ${subject['hours']}h'),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => _showEditSubjectDialog(subject),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _showAddSubjectDialog,
+            tooltip: 'Adicionar Disciplina',
+            child: Icon(Icons.add),
+          ),
+        ],
+      ),
+    );
   }
 
-  // Method to add a new subject to the list
-  void _addSubject(String subject, int hours, IconData icon, Color color) {
-    setState(() {
-      subjects
-          .add({'name': subject, 'hours': hours, 'icon': icon, 'color': color});
-      filteredSubjects = subjects;
-    });
-  }
-
-  // Method to show a dialog for adding a new subject
   void _showAddSubjectDialog() {
+    // Variáveis para armazenar os valores da nova disciplina
     String newSubject = '';
     int selectedHours = 0;
     IconData selectedIcon = Icons.book;
     Color selectedColor = Colors.teal;
 
+    // Lista de cores disponíveis
+    final List<Color> colors = [Colors.teal, Colors.red, Colors.blue, Colors.green];
+
+    // Exibir o diálogo para adicionar uma nova disciplina
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Adicionar Disciplina'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                onChanged: (value) {
-                  newSubject = value;
-                },
-                decoration: InputDecoration(hintText: "Nome da Disciplina"),
-              ),
-              SizedBox(height: 20),
-              Row(
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Adicionar Disciplina'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Horas Semanais de Estudo:'),
-                  Spacer(),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return DropdownButton<int>(
+                  // Campo de texto para o nome da disciplina
+                  TextField(
+                    onChanged: (value) {
+                      newSubject = value;
+                    },
+                    decoration: InputDecoration(hintText: "Nome da Disciplina"),
+                  ),
+                  SizedBox(height: 20),
+                  // Dropdown para selecionar as horas semanais de estudo
+                  Row(
+                    children: [
+                      Text('Horas Semanais de Estudo:'),
+                      Spacer(),
+                      DropdownButton<int>(
                         value: selectedHours,
-                        items: List.generate(25, (index) => index)
-                            .map((int value) {
+                        items: List.generate(25, (index) => index).map((int value) {
                           return DropdownMenuItem<int>(
                             value: value,
                             child: Text('$value h'),
@@ -73,19 +142,16 @@ class _SubjectsPageState extends State<SubjectsPage> {
                             selectedHours = newValue!;
                           });
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Text('Selecionar Ícone:'),
-                  Spacer(),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return DropdownButton<IconData>(
+                  SizedBox(height: 20),
+                  // Dropdown para selecionar o ícone da disciplina
+                  Row(
+                    children: [
+                      Text('Selecionar Ícone:'),
+                      Spacer(),
+                      DropdownButton<IconData>(
                         value: selectedIcon,
                         items: [
                           DropdownMenuItem(
@@ -110,122 +176,113 @@ class _SubjectsPageState extends State<SubjectsPage> {
                             selectedIcon = newValue!;
                           });
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Text('Selecionar Cor:'),
-                  Spacer(),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return DropdownButton<Color>(
+                  SizedBox(height: 20),
+                  // Dropdown para selecionar a cor da disciplina
+                  Row(
+                    children: [
+                      Text('Selecionar Cor:'),
+                      Spacer(),
+                      DropdownButton<Color>(
                         value: selectedColor,
-                        items: [
-                          DropdownMenuItem(
-                            value: Colors.teal,
+                        items: colors.map((Color color) {
+                          return DropdownMenuItem<Color>(
+                            value: color,
                             child: Container(
                               width: 24,
                               height: 24,
-                              color: Colors.teal,
+                              color: color,
                             ),
-                          ),
-                          DropdownMenuItem(
-                            value: Colors.red,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              color: Colors.red,
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: Colors.blue,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: Colors.green,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                         onChanged: (Color? newValue) {
                           setState(() {
                             selectedColor = newValue!;
                           });
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Adicionar'),
-              onPressed: () {
-                if (newSubject.isNotEmpty) {
-                  _addSubject(
-                      newSubject, selectedHours, selectedIcon, selectedColor);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancelar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text('Adicionar'),
+                  onPressed: () {
+                    if (newSubject.isNotEmpty) {
+                      // Usar o SubjectProvider para adicionar a nova disciplina
+                      Provider.of<SubjectProvider>(context, listen: false).addSubject(
+                        newSubject,
+                        selectedHours,
+                        selectedIcon,
+                        selectedColor,
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  // Method to show a dialog for editing a subject
   void _showEditSubjectDialog(Map<String, dynamic> subject) {
+    // Variáveis para armazenar os valores atualizados da disciplina
     String updatedSubject = subject['name'];
     int updatedHours = subject['hours'];
-    IconData updatedIcon = subject['icon'];
-    Color updatedColor = subject['color'];
+    IconData updatedIcon = IconData(subject['icon'], fontFamily: 'MaterialIcons');
+    Color updatedColor = Color(subject['color']);
 
+    // Controlador de texto para o campo de nome da disciplina
+    TextEditingController subjectController = TextEditingController(text: updatedSubject);
+
+    // Lista de cores disponíveis
+    final List<Color> colors = [Colors.teal, Colors.red, Colors.blue, Colors.green];
+
+    // Verificar se a cor inicial está na lista de cores
+    if (!colors.contains(updatedColor)) {
+      colors.add(updatedColor);
+    }
+
+    // Exibir o diálogo para editar a disciplina
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Editar Disciplina'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: TextEditingController(text: updatedSubject),
-                onChanged: (value) {
-                  updatedSubject = value;
-                },
-                decoration: InputDecoration(hintText: "Nome da Disciplina"),
-              ),
-              SizedBox(height: 20),
-              Row(
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Editar Disciplina'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Horas Semanais de Estudo:'),
-                  Spacer(),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return DropdownButton<int>(
+                  // Campo de texto para o nome da disciplina
+                  TextField(
+                    controller: subjectController,
+                    onChanged: (value) {
+                      updatedSubject = value;
+                    },
+                    decoration: InputDecoration(hintText: "Nome da Disciplina"),
+                  ),
+                  SizedBox(height: 20),
+                  // Dropdown para selecionar as horas semanais de estudo
+                  Row(
+                    children: [
+                      Text('Horas Semanais de Estudo:'),
+                      Spacer(),
+                      DropdownButton<int>(
                         value: updatedHours,
-                        items: List.generate(25, (index) => index)
-                            .map((int value) {
+                        items: List.generate(25, (index) => index).map((int value) {
                           return DropdownMenuItem<int>(
                             value: value,
                             child: Text('$value h'),
@@ -236,19 +293,16 @@ class _SubjectsPageState extends State<SubjectsPage> {
                             updatedHours = newValue!;
                           });
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Text('Selecionar Ícone:'),
-                  Spacer(),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return DropdownButton<IconData>(
+                  SizedBox(height: 20),
+                  // Dropdown para selecionar o ícone da disciplina
+                  Row(
+                    children: [
+                      Text('Selecionar Ícone:'),
+                      Spacer(),
+                      DropdownButton<IconData>(
                         value: updatedIcon,
                         items: [
                           DropdownMenuItem(
@@ -273,286 +327,73 @@ class _SubjectsPageState extends State<SubjectsPage> {
                             updatedIcon = newValue!;
                           });
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Text('Selecionar Cor:'),
-                  Spacer(),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return DropdownButton<Color>(
+                  SizedBox(height: 20),
+                  // Dropdown para selecionar a cor da disciplina
+                  Row(
+                    children: [
+                      Text('Selecionar Cor:'),
+                      Spacer(),
+                      DropdownButton<Color>(
                         value: updatedColor,
-                        items: [
-                          DropdownMenuItem(
-                            value: Colors.teal,
+                        items: colors.map((Color color) {
+                          return DropdownMenuItem<Color>(
+                            value: color,
                             child: Container(
                               width: 24,
                               height: 24,
-                              color: Colors.teal,
+                              color: color,
                             ),
-                          ),
-                          DropdownMenuItem(
-                            value: Colors.red,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              color: Colors.red,
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: Colors.blue,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: Colors.green,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                         onChanged: (Color? newValue) {
                           setState(() {
                             updatedColor = newValue!;
                           });
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Excluir'),
-              onPressed: () {
-                _showDeleteConfirmationDialog(subject);
-              },
-            ),
-            TextButton(
-              child: Text('Salvar'),
-              onPressed: () {
-                if (updatedSubject.isNotEmpty) {
-                  setState(() {
-                    subject['name'] = updatedSubject;
-                    subject['hours'] = updatedHours;
-                    subject['icon'] = updatedIcon;
-                    subject['color'] = updatedColor;
-                    filteredSubjects = subjects;
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Method to show a confirmation dialog before deleting a subject
-  void _showDeleteConfirmationDialog(Map<String, dynamic> subject) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Excluir Disciplina'),
-          content: Text('Tem certeza de que deseja excluir esta disciplina?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Excluir'),
-              onPressed: () {
-                _deleteSubject(subject);
-                Navigator.of(context).pop();
-                Navigator.of(context).pop(); // Close the edit dialog as well
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Method to delete a subject
-  void _deleteSubject(Map<String, dynamic> subject) {
-    setState(() {
-      subjects.remove(subject);
-      filteredSubjects = subjects;
-    });
-  }
-
-  // Method to filter subjects based on the search query
-  void _filterSubjects(String query) {
-    setState(() {
-      filteredSubjects = subjects
-          .where((subject) =>
-              subject['name'].toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
-  }
-
-  // Method to show the schedule dialog
-  void _showScheduleDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Selecione os Horários Disponíveis'),
-          content: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SingleChildScrollView(
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return DataTable(
-                    columns: [
-                      DataColumn(label: Text('Hora')),
-                      DataColumn(label: Text('Seg')),
-                      DataColumn(label: Text('Ter')),
-                      DataColumn(label: Text('Qua')),
-                      DataColumn(label: Text('Qui')),
-                      DataColumn(label: Text('Sex')),
-                      DataColumn(label: Text('Sáb')),
-                      DataColumn(label: Text('Dom')),
-                    ],
-                    rows: List.generate(24, (hour) {
-                      return DataRow(
-                        cells: List.generate(8, (day) {
-                          if (day == 0) {
-                            return DataCell(Text('$hour:00'));
-                          } else {
-                            return DataCell(
-                              Checkbox(
-                                value: schedule[hour][day - 1],
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    schedule[hour][day - 1] = value ?? false;
-                                  });
-                                },
-                              ),
-                            );
-                          }
-                        }),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancelar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text('Excluir'),
+                  onPressed: () {
+                    // Usar o SubjectProvider para excluir a disciplina
+                    Provider.of<SubjectProvider>(context, listen: false).deleteSubject(subject);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text('Salvar'),
+                  onPressed: () {
+                    if (updatedSubject.isNotEmpty) {
+                      // Usar o SubjectProvider para atualizar a disciplina
+                      Provider.of<SubjectProvider>(context, listen: false).updateSubject(
+                        subject,
+                        updatedSubject,
+                        updatedHours,
+                        updatedIcon,
+                        updatedColor,
                       );
-                    }),
-                  );
-                },
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Fechar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Confirmar'),
-              onPressed: () {
-                // Add logic to save or process the schedule data here
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(selectedPage),
-      ),
-      drawer: AppDrawer(
-        selectedPage: selectedPage, // Passing the selected page to the Drawer
-        onItemSelected: (String page) {
-          setState(() {
-            selectedPage = page;
-          });
-        },
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              onChanged: _filterSubjects,
-              decoration: InputDecoration(
-                labelText: 'Pesquisar',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredSubjects.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: filteredSubjects[index]['color'],
-                      child: Icon(filteredSubjects[index]['icon'],
-                          color: Colors.white),
-                    ),
-                    title: Text(
-                      filteredSubjects[index]['name'],
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                        'Horas Semanais de Estudo: ${filteredSubjects[index]['hours']}h'),
-                    trailing: Icon(Icons.edit),
-                    onTap: () =>
-                        _showEditSubjectDialog(filteredSubjects[index]),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _showAddSubjectDialog,
-            tooltip: 'Adicionar Disciplina',
-            child: Icon(Icons.add),
-          ),
-          SizedBox(height: 10),
-          FloatingActionButton(
-            onPressed: _showScheduleDialog,
-            tooltip: 'Criar Cronograma',
-            child: Icon(Icons.schedule),
-          ),
-        ],
-      ),
     );
   }
 }

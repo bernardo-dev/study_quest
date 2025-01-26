@@ -43,6 +43,8 @@ dependencies:
   # Localizations for the Flutter library.
   flutter_localizations:
     sdk: flutter
+  shared_preferences: ^2.4.0
+
 
 dev_dependencies:
   flutter_test:
