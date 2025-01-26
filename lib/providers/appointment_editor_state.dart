@@ -1,24 +1,47 @@
 import 'package:flutter/material.dart';
 
 class AppointmentState with ChangeNotifier {
-  List<Color> _colorCollection = <Color>[];
-  List<String> _colorNames = <String>[];
-  int _selectedColorIndex = 0;
-  int _selectedTimeZoneIndex = 0;
-  List<String> _timeZoneCollection = <String>[];
-  late DateTime _startDate;
-  late TimeOfDay _startTime;
-  late DateTime _endDate;
-  late TimeOfDay _endTime;
-  bool _isAllDay = false;
   String _subject = '';
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now().add(Duration(hours: 1));
+  TimeOfDay _startTime = TimeOfDay.now();
+  TimeOfDay _endTime =
+      TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
+  Color _color = Colors.lightBlue; // Default color
+
+  bool _isAllDay = false;
+
   String _notes = '';
 
-  List<Color> get colorCollection => _colorCollection;
-  List<String> get colorNames => _colorNames;
-  int get selectedColorIndex => _selectedColorIndex;
-  int get selectedTimeZoneIndex => _selectedTimeZoneIndex;
-  List<String> get timeZoneCollection => _timeZoneCollection;
+  final List<Color> _colorCollection = [
+    const Color(0xFF0F8644),
+    const Color(0xFF8B1FA9),
+    const Color(0xFFD20100),
+    const Color(0xFFFC571D),
+    const Color(0xFF85461E),
+    const Color(0xFFFF00FF),
+    const Color(0xFF3D4FB5),
+    const Color(0xFFE47C73),
+    const Color(0xFF636363),
+  ];
+
+  final List<String> _colorNames = [
+    'Verde',
+    'Roxo',
+    'Vermelho',
+    'Laranja',
+    'Caramelo',
+    'Magenta',
+    'Azul',
+    'Pêssego',
+    'Cinza',
+  ];
+
+  late final Color _selectedColor;
+
+  AppointmentState() {
+    _selectedColor = _colorCollection[0];
+  }
 
   DateTime get startDate => _startDate;
   TimeOfDay get startTime => _startTime;
@@ -27,31 +50,10 @@ class AppointmentState with ChangeNotifier {
   bool get isAllDay => _isAllDay;
   String get subject => _subject;
   String get notes => _notes;
-
-  void setColorCollection(List<Color> value) {
-    _colorCollection = value;
-    notifyListeners();
-  }
-
-  void setColorNames(List<String> value) {
-    _colorNames = value;
-    notifyListeners();
-  }
-
-  void setSelectedColorIndex(int value) {
-    _selectedColorIndex = value;
-    notifyListeners();
-  }
-
-  void setSelectedTimeZoneIndex(int value) {
-    _selectedTimeZoneIndex = value;
-    notifyListeners();
-  }
-
-  void setTimeZoneCollection(List<String> value) {
-    _timeZoneCollection = value;
-    notifyListeners();
-  }
+  Color get color => _color;
+  List<Color> get colorCollection => _colorCollection;
+  List<String> get colorNames => _colorNames;
+  Color get selectedColor => _selectedColor;
 
   void setStartDate(DateTime value) {
     _startDate = value;
@@ -85,6 +87,16 @@ class AppointmentState with ChangeNotifier {
 
   void setNotes(String value) {
     _notes = value;
+    notifyListeners();
+  }
+
+  void setColor(Color value) {
+    _color = value;
+    notifyListeners();
+  }
+
+  void setSelectedColor(Color value) {
+    _selectedColor = value;
     notifyListeners();
   }
 }

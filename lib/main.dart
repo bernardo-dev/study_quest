@@ -21,12 +21,19 @@ class CalendarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(localizationsDelegates: [
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-    ], supportedLocales: [
-      Locale('pt', 'BR'),
-      Locale('en', 'US'),
-    ], locale: Locale('pt', 'BR'), title: 'Study Quest', home: CalendarPage());
+    return const MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale('pt', 'BR'),
+        Locale('en', 'US'),
+      ],
+      locale: Locale('pt', 'BR'),
+      title: 'Study Quest',
+      home: CalendarPage(),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
