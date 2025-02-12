@@ -368,9 +368,29 @@ class _SubjectsPageState extends State<SubjectsPage> {
                 TextButton(
                   child: Text('Excluir'),
                   onPressed: () {
-                    // Usar o SubjectProvider para excluir a disciplina
-                    Provider.of<SubjectProvider>(context, listen: false).deleteSubject(subject);
-                    Navigator.of(context).pop();
+                    // Usar o SubjectProvider para excluir a disciplina EM UM ALERT DIALOG
+                    showDialog(context: context, builder: (context) {
+                      return AlertDialog(
+                        title: Text('Excluir Disciplina'),
+                        content: Text('Tem certeza que deseja excluir a disciplina?'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('Cancelar'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: Text('Excluir'),
+                            onPressed: () {
+                              Provider.of<SubjectProvider>(context, listen: false).deleteSubject(subject);
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    });
                   },
                 ),
                 TextButton(
