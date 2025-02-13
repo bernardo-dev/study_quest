@@ -1,56 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/appointment_editor_state.dart';
+import 'package:study_quest/pages/calendar_page.dart';
+import 'package:study_quest/pages/event_editing_page.dart';
+import 'package:study_quest/providers/event_provider.dart';
+import 'package:study_quest/widgets/app_drawer.dart';
+import 'package:study_quest/widgets/calendar_widget.dart';
 import 'providers/subject_provider.dart';
 import 'repositories/subject_repository.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'views/calendar/calendar.dart';
 import 'views/subjects/subjects.dart';
 
-// Tela de Calendário
-// Tela de Gerenciamento de Disciplinas
-
-// void main() {
-//   return runApp(ChangeNotifierProvider(
-//     create: (context) => AppointmentState(),
-//     child: const CalendarApp(),
-//   ));
-// }
 void main() {
-  final subjectRepository = SubjectRepository();
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AppointmentState()),
-        ChangeNotifierProvider(
-            create: (context) => SubjectProvider(subjectRepository)),
-      ],
-      child: const CalendarApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
-/// The app which hosts the home page which contains the calendar on it.
-class CalendarApp extends StatelessWidget {
-  const CalendarApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
+    final subjectRepository = SubjectRepository();
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => EventProvider()),
+        ChangeNotifierProvider(
+            create: (context) => SubjectProvider(subjectRepository)),
       ],
-      supportedLocales: [
-        Locale('pt', 'BR'),
-        Locale('en', 'US'),
-      ],
-      locale: Locale('pt', 'BR'),
-      title: 'Study Quest',
-      home: CalendarPage(),
-      debugShowCheckedModeBanner: false,
+      child: MaterialApp(
+        title: 'Study Quest',
+        themeMode: ThemeMode.dark,
+        darkTheme: ThemeData.dark(),
+        home: CalendarPage(),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
+
+// class MainPage extends StatefulWidget {
+//   @override
+//   _MainPageState createState() => _MainPageState();
+// }
+
+// class _MainPageState extends State<MainPage> {
+//   String selectedPage = 'Página Inicial';
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Study Quest'),
+//       ),
+//       drawer: AppDrawer(
+//         selectedPage: selectedPage,
+//         onItemSelected: (String page) {
+//           setState(() => selectedPage = page);
+//         },
+//       ),
+//       body: CalendarWidget(),
+//       floatingActionButton: FloatingActionButton(
+//         backgroundColor: Colors.blue,
+//         onPressed: () => Navigator.of(context)
+//             .push(MaterialPageRoute(builder: (context) => EventEditingPage())),
+//         child: Icon(Icons.add, color: Colors.white),
+//       ),
+//     );
+//   }
+// }

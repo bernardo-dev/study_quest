@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../views/calendar/calendar.dart';
-import '../views/subjects/subjects.dart';
+import 'package:study_quest/pages/calendar_page.dart';
+import 'package:study_quest/views/subjects/subjects.dart';
 
 class AppDrawer extends StatelessWidget {
   final String selectedPage; // Passando a página selecionada
