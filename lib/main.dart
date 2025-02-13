@@ -5,11 +5,15 @@ import 'package:study_quest/pages/event_editing_page.dart';
 import 'package:study_quest/providers/event_provider.dart';
 import 'package:study_quest/widgets/app_drawer.dart';
 import 'package:study_quest/widgets/calendar_widget.dart';
+import 'providers/appointment_provider.dart';
 import 'providers/subject_provider.dart';
+import 'repositories/appointment_repository.dart';
 import 'repositories/subject_repository.dart';
 
 import 'views/calendar/calendar.dart';
 import 'views/subjects/subjects.dart';
+import 'providers/progress_provider.dart';
+import 'views/progress/progress.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,11 +25,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subjectRepository = SubjectRepository();
+    final appointmentRepository = AppointmentRepository();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => EventProvider()),
         ChangeNotifierProvider(
             create: (context) => SubjectProvider(subjectRepository)),
+        ChangeNotifierProvider(
+            create: (context) => AppointmentProvider(appointmentRepository)),
+        ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
       child: MaterialApp(
         title: 'Study Quest',

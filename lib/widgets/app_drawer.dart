@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:study_quest/pages/calendar_page.dart';
+import 'package:study_quest/views/progress/progress.dart';
 import 'package:study_quest/views/subjects/subjects.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -71,13 +72,24 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.flag),
-            title: const Text('Metas'),
-            tileColor: selectedPage == 'Metas'
-                ? Colors.blue.withOpacity(0.2)
+            leading: const Icon(Icons.line_axis),
+            title: const Text('Progresso'),
+            tileColor: selectedPage == 'Progresso'
+                ? Colors.blue
                 : null, // Página atual com cor diferenciada
             onTap: () {
-              onItemSelected('Metas');
+              if (selectedPage == "Progresso") {
+                Navigator.pop(context);
+              } else {
+                onItemSelected('Progresso');
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => ProgressScreen(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
+              }
             },
           ),
         ],
