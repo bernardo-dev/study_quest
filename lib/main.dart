@@ -14,6 +14,7 @@ import 'views/calendar/calendar.dart';
 import 'views/subjects/subjects.dart';
 import 'providers/progress_provider.dart';
 import 'views/progress/progress.dart';
+import 'pages/authentication_page.dart';
 
 void main() {
   runApp(const MyApp());
